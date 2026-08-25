@@ -1,6 +1,10 @@
 import argparse
+import sys
 from importlib.metadata import version
 from pathlib import Path
+
+from pdfjoin.core import merge
+from pdfjoin.errors import InputNotFoundError, InvalidPdfError, OutputConflictError
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -30,5 +34,22 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    print(args)
+
+    try:
+        pages = merge(
+            [args.prefile, args.rearfile],
+            args.output,
+            overwrite=args.force,
+        )
+    except InputNotFoundError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 3
+    except InvalidPdfError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 4
+    except OutputConflictError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 5
+
+    print(f"マージしました:{pages}ページ")
     return 0
