@@ -68,6 +68,7 @@ def test_merge_raises_when_input_is_not_pdf(tmp_path, make_pdf):
 
     assert not output.exists()
 
+
 def test_merge_overwrites_when_forced(tmp_path, make_pdf):
     a = make_pdf(tmp_path / "a.pdf", 1)
     b = make_pdf(tmp_path / "b.pdf", 2)
