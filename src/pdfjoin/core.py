@@ -7,15 +7,17 @@ from pdfjoin.errors import InputNotFoundError, InvalidPdfError, OutputConflictEr
 
 
 def merge(inputs: list[Path], output: Path, *, overwrite: bool = False) -> int:
-    """連結してページ数を返す。"""
-    # argparse も print も sys.exit もここに書かない。
+    """inputs を順に連結して output に書き出し、総ページ数を返す。
+
+    Raises:
+        ValueError: inputs が空のとき
+        InputNotFoundError: 入力が存在しない、またはファイルでないとき
+        InvalidPdfError: PDFとして読めない、または暗号化されているとき
+        OutputConflictError: 出力先が入力と同一、または既存で overwrite=False のとき
+    """
     # --- 検証フェーズ: ここでは一切書き込まない ---
-    # inputが空でないか ValueError
     if not inputs:
         raise ValueError("入力ファイルが指定されていません")
-    # 各inputが存在し、ファイルがあるか InputNotFoundError
-    # 各入力がPDFとして開け、暗号化されていないか InvalidPdfErrror
-    # outputが入力のいずれかと同一のパスでないか OutputConflictError
     for path in inputs:
         if not path.is_file():
             raise InputNotFoundError(f"ファイルが存在しません:{path}")
@@ -27,7 +29,6 @@ def merge(inputs: list[Path], output: Path, *, overwrite: bool = False) -> int:
             raise InvalidPdfError(f"ファイルは暗号化されています:{path}")
         if output.resolve() == path.resolve():
             raise OutputConflictError(f"出力先が入力ファイルと同じパスです:{path}")
-    # outputが既存ならoverwrite=Trueであるか OutputConflictError
     if output.is_file() and not overwrite:
         raise OutputConflictError(f"出力ファイルが既に存在しています:{output}")
     # --- 書き込みフェーズ ---
@@ -36,5 +37,4 @@ def merge(inputs: list[Path], output: Path, *, overwrite: bool = False) -> int:
     for path in inputs:
         writer.append(path)
     writer.write(output)
-    # 戻り値: 総ページ数とりあえず今は0
     return len(writer.pages)
