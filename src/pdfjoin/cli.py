@@ -34,6 +34,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.verbose:
+        print(f"入力: {args.prefile}")
+        print(f"入力: {args.rearfile}")
+        print(f"出力: {args.output}")
 
     try:
         pages = merge(
